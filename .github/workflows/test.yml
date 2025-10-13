@@ -25,4 +25,4 @@ jobs:
 
         - name: Run tests with coverage
           run: |
-            python -m pytest tests/ -v --cov=library_service --cov-report=xml tests/
+            PYTHONPATH=. python -m pytest tests/ -v --cov=library_service --cov-report=xml --cov-report=term-missing
