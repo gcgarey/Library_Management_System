@@ -25,18 +25,19 @@ class TestR6Requirements:
         conn.close()
 
     def test_has_parameter_q_and_type(self):
-        """Test that the function has parameters q and type"""
+        """Test that the function has parameters q and search_type"""
         assert search_books_in_catalog.__code__.co_varnames[0] == 'q'
-        assert search_books_in_catalog.__code__.co_varnames[1] == 'type'
+        assert search_books_in_catalog.__code__.co_varnames[1] == 'search_type'
 
     def test_partial_matching_for_title_search(self):
         """Test partial matching for title search"""
         # Add books to the database
         insert_book("The Great Gatsby", "F. Scott Fitzgerald", "1234567890123", 3, 3)
         insert_book("Great Expectations", "Charles Dickens", "1234567890124", 2, 2)
-        
+
         result = search_books_in_catalog("Great", "title")
-        assert "The Great Gatsby" in result and "Great Expectations" in result
+        titles = [book['title'] for book in result]
+        assert "The Great Gatsby" in titles and "Great Expectations" in titles
 
     def test_exact_matching_for_isbn_search_compete(self):
         """Test exact matching for ISBN search"""
@@ -44,7 +45,8 @@ class TestR6Requirements:
         insert_book("Brave New World", "Aldous Huxley", "1234567890124", 5, 5)
 
         result = search_books_in_catalog("1234567890123", "isbn")
-        assert "1984" in result
+        titles = [book['title'] for book in result]
+        assert "1984" in titles
     
     def test_isbn_exact_matching_search_partial(self):
         """Test that partial matching for ISBN search returns no results"""

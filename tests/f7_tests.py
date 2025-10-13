@@ -27,9 +27,9 @@ class TestR7Requirements:
     def test_status_report_with_no_borrowed_books(self):
         """Test status report for patron with no borrowed books"""
         report = get_patron_status_report("123456")
-        assert report["currently_borrowed_due_dates"] == ""
-        assert report["late_fees"] == 0.0
-        assert report["number_of_books_borrowed"] == 0
+        assert report["currently_borrowed_books"] == []
+        assert report["total_late_fees"] == 0.0
+        assert report["num_books_borrowed"] == 0
 
     def test_status_report_with_currently_borrowed_books(self):
         """Test status report showing currently borrowed books with due dates"""
@@ -44,14 +44,16 @@ class TestR7Requirements:
         insert_borrow_record("123456", 2, borrow_date, due_date)
 
         report = get_patron_status_report("123456")
-        assert report["number_of_books_borrowed"] == 2
-        assert "1984" in report["currently_borrowed_due_dates"]
-        assert "Brave New World" in report["currently_borrowed_due_dates"]
+        assert report["num_books_borrowed"] == 2
+        titles = [book['title'] for book in report["currently_borrowed_books"]]
+        assert "1984" in titles
+        assert "Brave New World" in titles
 
     def test_status_report_calculates_total_late_fees(self):
         """Test status report calculates total late fees owed across all books"""
-        # Add book to catalog
-        insert_book("Overdue Book", "Test Author", "1234567890123", 1, 1)
+        # Add books to catalog
+        insert_book("Overdue Book 1", "Test Author", "1234567890123", 1, 1)
+        insert_book("Overdue Book 2", "Test Author", "1234567890124", 1, 1)
 
         # Create overdue borrow record (30 days overdue)
         borrow_date = datetime.now() - timedelta(days=44)  # 44 days ago, so 30 days overdue
@@ -60,11 +62,11 @@ class TestR7Requirements:
 
         borrow_date_2 = datetime.now() - timedelta(days=20)  # 20 days ago, so 6 days overdue
         due_date_2 = borrow_date_2 + timedelta(days=14)
-        insert_borrow_record("123456", 1, borrow_date_2, due_date_2)
+        insert_borrow_record("123456", 2, borrow_date_2, due_date_2)
 
         report = get_patron_status_report("123456")
-        # Should calculate late fees: capped at $15.00 * 2 books
-        assert report["late_fees"] == 30.00
+        # Should calculate late fees: $15.00 (capped) + $3.00 (6 days at $0.50)
+        assert report["total_late_fees"] == 18.00
 
     def test_displays_number_of_books_currently_borrowed(self):
         """Test status report displays correct number of books currently borrowed"""
@@ -74,4 +76,4 @@ class TestR7Requirements:
         insert_borrow_record("123456", 1, datetime.now(), datetime.now() + timedelta(days=14))
         insert_borrow_record("123456", 2, datetime.now(), datetime.now() + timedelta(days=14))
         report = get_patron_status_report("123456")
-        assert report["number_of_books_borrowed"] == 2
+        assert report["num_books_borrowed"] == 2

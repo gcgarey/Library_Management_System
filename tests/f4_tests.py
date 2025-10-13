@@ -28,10 +28,10 @@ class TestR4Requirements:
         """Test return book function with incorrect parameters (patron ID, book ID, date returned)"""
         # Add a book and a borrow record
         insert_book("Test Book", "Test Author", "1234567890123", 3, 2)
-        insert_borrow_record(123456, 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
+        insert_borrow_record("123456", 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
 
-        
-        result, message = return_book_by_patron("12345", 1, datetime.now())
+
+        result, message = return_book_by_patron("12345", 1)
         assert result == False
 
          
@@ -39,12 +39,12 @@ class TestR4Requirements:
         """Test that patron borrowed the book before returning it --> should succeed"""
         # Add a book and a borrow record"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 2)
-        insert_borrow_record(123456, 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
+        insert_borrow_record("123456", 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
 
         # return the book
         result, message = return_book_by_patron("123456", 1)
         assert result == True
-        assert "Successfully returned" in message
+        assert "returned successfully" in message.lower()
 
     def test_patron_returns_book_not_borrowed(self):
         """Test that patron tries to return a book they did not borrow --> should fail"""
@@ -59,7 +59,7 @@ class TestR4Requirements:
         """Test that available copies are updated correctly after a return"""
         # Add a book and a borrow record
         insert_book("Test Book", "Test Author", "1234567890123", 3, 2)
-        insert_borrow_record(123456, 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
+        insert_borrow_record("123456", 1, datetime.now() - timedelta(days=5), datetime.now() + timedelta(days=9))
 
         # Return the book
         result, message = return_book_by_patron("123456", 1)
@@ -72,7 +72,7 @@ class TestR4Requirements:
         """Test that late fees are calculated for overdue returns"""
         # Add a book and a borrow record with past due date
         insert_book("Test Book", "Test Author", "1234567890123", 3, 2)
-        insert_borrow_record(123456, 1, datetime.now() - timedelta(days=20), datetime.now() - timedelta(days=6))
+        insert_borrow_record("123456", 1, datetime.now() - timedelta(days=20), datetime.now() - timedelta(days=6))
 
         # Return the book
         result, message = return_book_by_patron("123456", 1)

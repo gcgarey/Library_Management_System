@@ -253,7 +253,7 @@ def get_borrowing_history(patron_id: str) -> List[Dict]:
         JOIN books b ON br.book_id = b.id
         WHERE br.patron_id = ? AND br.return_date IS NOT NULL
         ORDER BY br.borrow_date DESC
-    ''', (patron_id)).fetchall()
+    ''', (patron_id,)).fetchall()
     conn.close()
 
     history = []

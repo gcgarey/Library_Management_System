@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from library_service import calculate_late_fee_for_book
-from database import init_database, get_db_connection, insert_book
+from database import init_database, get_db_connection, insert_book, insert_borrow_record
 
 class TestR5Requirements:
     """Test cases for R5: Late Fee Calculation"""
@@ -28,48 +28,53 @@ class TestR5Requirements:
         """Test no late fee if book is returned on or before due date"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
+        borrow_date = datetime.now()
         due_date = datetime.now() + timedelta(days=7)
-        return_date = due_date
+        insert_borrow_record("123456", 1, borrow_date, due_date)
 
-        fee = calculate_late_fee_for_book(1, due_date, return_date)
-        assert fee == 0.0
+        result = calculate_late_fee_for_book("123456", 1)
+        assert result['fee_amount'] == 0.0
 
     def test_late_fee_calculation_one_day_late(self):
         """Test late fee calculation for one day late return"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
+        borrow_date = datetime.now() - timedelta(days=15)
         due_date = datetime.now() - timedelta(days=1)
-        return_date = datetime.now()
+        insert_borrow_record("123456", 1, borrow_date, due_date)
 
-        fee = calculate_late_fee_for_book(1, due_date, return_date)
-        assert fee == 0.50
+        result = calculate_late_fee_for_book("123456", 1)
+        assert result['fee_amount'] == 0.50
 
     def test_late_fee_calculation_under_seven_days_late(self):
         """Test late fee calculation for multiple days late return"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
+        borrow_date = datetime.now() - timedelta(days=19)
         due_date = datetime.now() - timedelta(days=5)
-        return_date = datetime.now()
+        insert_borrow_record("123456", 1, borrow_date, due_date)
 
-        fee = calculate_late_fee_for_book(1, due_date, return_date)
-        assert fee == 2.50  # 5 days late at $0.50/day
+        result = calculate_late_fee_for_book("123456", 1)
+        assert result['fee_amount'] == 2.50  # 5 days late at $0.50/day
 
     def test_late_fee_calculation_over_seven_days_late(self):
-        """Test that late fee is correctly calculated for returns over 7 dayas"""
+        """Test that late fee is correctly calculated for returns over 7 days"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
-        due_date = datetime.now() + timedelta(days=8)
-        return_date = datetime.now()
+        borrow_date = datetime.now() - timedelta(days=22)
+        due_date = datetime.now() - timedelta(days=8)
+        insert_borrow_record("123456", 1, borrow_date, due_date)
 
-        fee = calculate_late_fee_for_book(1, due_date, return_date)
-        assert fee == 4.5 # 7 days late at $0.50 + 1 day at $1.00
+        result = calculate_late_fee_for_book("123456", 1)
+        assert result['fee_amount'] == 4.50  # 7 days at $0.50 + 1 day at $1.00
 
     def test_late_fee_capped_at_fifteen_dollars(self):
         """Test that late fee is capped at $15.00"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
+        borrow_date = datetime.now() - timedelta(days=54)
         due_date = datetime.now() - timedelta(days=40)  # 40 days late
-        return_date = datetime.now()
+        insert_borrow_record("123456", 1, borrow_date, due_date)
 
-        fee = calculate_late_fee_for_book(1, due_date, return_date)
-        assert fee == 15.00  # Capped at $15.00
+        result = calculate_late_fee_for_book("123456", 1)
+        assert result['fee_amount'] == 15.00  # Capped at $15.00
