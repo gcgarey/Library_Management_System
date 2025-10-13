@@ -1,5 +1,7 @@
 # Library Management System - Flask Web Application with SQLite
 
+[![codecov](https://codecov.io/gh/gcgarey/Library_Management_System/branch/main/graph/badge.svg)](https://codecov.io/gh/gcgarey/Library_Management_System)
+
 ## Overview
 
 This project contains a partial implementation of a Flask-based Library Management System with SQLite database, designed for CISC 327 (Software Quality Assurance) coursework.
@@ -47,5 +49,6 @@ See [`student_instructions.md`](student_instructions.md) for complete assignment
 - [Test Driven Development](https://www.datacamp.com/tutorial/test-driven-development-in-python)
 - [Pytest framework](https://realpython.com/pytest-python-testing/)
 - [Python Blueprint](https://flask.palletsprojects.com/en/stable/blueprints)
+
 
 
