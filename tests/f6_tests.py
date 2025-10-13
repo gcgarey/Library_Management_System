@@ -24,7 +24,7 @@ class TestR6Requirements:
         conn.commit()
         conn.close()
 
-    def test_has_parameter_q_term(self):
+    def test_has_parameter_q_and_type(self):
         """Test that the function has parameters q and type"""
         assert search_books_in_catalog.__code__.co_varnames[0] == 'q'
         assert search_books_in_catalog.__code__.co_varnames[1] == 'type'

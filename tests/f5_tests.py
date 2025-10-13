@@ -55,7 +55,7 @@ class TestR5Requirements:
         assert fee == 2.50  # 5 days late at $0.50/day
 
     def test_late_fee_calculation_over_seven_days_late(self):
-        """Test that late fee is not negative if returned early"""
+        """Test that late fee is correctly calculated for returns over 7 dayas"""
         insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
 
         due_date = datetime.now() + timedelta(days=8)
@@ -64,5 +64,12 @@ class TestR5Requirements:
         fee = calculate_late_fee_for_book(1, due_date, return_date)
         assert fee == 4.5 # 7 days late at $0.50 + 1 day at $1.00
 
-    def test_returns_json_response_with_fee_amount(self):
-        """Test that the result is in json format with fee amount"""
+    def test_late_fee_capped_at_fifteen_dollars(self):
+        """Test that late fee is capped at $15.00"""
+        insert_book("Test Book", "Test Author", "1234567890123", 3, 3)
+
+        due_date = datetime.now() - timedelta(days=40)  # 40 days late
+        return_date = datetime.now()
+
+        fee = calculate_late_fee_for_book(1, due_date, return_date)
+        assert fee == 15.00  # Capped at $15.00

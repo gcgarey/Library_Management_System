@@ -189,8 +189,8 @@ def update_borrow_record_return_date(patron_id: str, book_id: int, return_date: 
     conn = get_db_connection()
     try:
         conn.execute('''
-            UPDATE borrow_records 
-            SET return_date = ? 
+            UPDATE borrow_records
+            SET return_date = ?
             WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
         ''', (return_date.isoformat(), patron_id, book_id))
         conn.commit()
@@ -199,3 +199,71 @@ def update_borrow_record_return_date(patron_id: str, book_id: int, return_date: 
     except Exception as e:
         conn.close()
         return False
+
+def get_borrow_record(patron_id: str, book_id: int) -> Optional[Dict]:
+    """Get a specific borrow record for a patron and book."""
+    conn = get_db_connection()
+    record = conn.execute('''
+        SELECT * FROM borrow_records
+        WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
+        ORDER BY borrow_date DESC
+        LIMIT 1
+    ''', (patron_id, book_id)).fetchone()
+    conn.close()
+    return dict(record) if record else None
+
+def search_books(search_term: str, search_type: str) -> List[Dict]:
+    """
+    Search for books in the database.
+
+    Args:
+        search_term: The term to search for
+        search_type: Type of search ('title', 'author', or 'isbn')
+
+    Returns:
+        List of matching books
+    """
+    conn = get_db_connection()
+
+    if search_type == 'isbn':
+        # Exact match for ISBN
+        books = conn.execute('''
+            SELECT * FROM books WHERE isbn = ? ORDER BY title
+        ''', (search_term,)).fetchall()
+    elif search_type == 'author':
+        # Partial, case-insensitive match for author
+        books = conn.execute('''
+            SELECT * FROM books WHERE LOWER(author) LIKE LOWER(?) ORDER BY title
+        ''', (f'%{search_term}%',)).fetchall()
+    else:  # Default to title
+        # Partial, case-insensitive match for title
+        books = conn.execute('''
+            SELECT * FROM books WHERE LOWER(title) LIKE LOWER(?) ORDER BY title
+        ''', (f'%{search_term}%',)).fetchall()
+
+    conn.close()
+    return [dict(book) for book in books]
+
+def get_borrowing_history(patron_id: str) -> List[Dict]:
+    """Get the complete borrowing history for a patron."""
+    conn = get_db_connection()
+    records = conn.execute('''
+        SELECT br.*, b.title, b.author
+        FROM borrow_records br
+        JOIN books b ON br.book_id = b.id
+        WHERE br.patron_id = ? AND br.return_date IS NOT NULL
+        ORDER BY br.borrow_date DESC
+    ''', (patron_id)).fetchall()
+    conn.close()
+
+    history = []
+    for record in records:
+        history.append({
+            'book_id': record['book_id'],
+            'title': record['title'],
+            'author': record['author'],
+            'borrow_date': datetime.fromisoformat(record['borrow_date']),
+            'due_date': datetime.fromisoformat(record['due_date']),
+            'return_date': datetime.fromisoformat(record['return_date'])
+        })
+    return history

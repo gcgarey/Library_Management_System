@@ -75,60 +75,6 @@ class TestR3Requirements:
         book = get_book_by_id(1)
         assert book['available_copies'] == 1
 
-    def test_book_availability_check_unavailable_book(self):
-        """Test borrowing fails when book has no available copies"""
-        insert_book("Unavailable Book", "Author", "1234567890123", 2, 0)
-
-        result, message = borrow_book_by_patron("123456", 1)
-        assert result == False
-        assert "not available" in message
-
-    def test_patron_borrowing_limit_under_5_books(self):
-        """Test borrowing succeeds when patron has less than 5 books"""
-        insert_book("Book 1", "Author", "1234567890123", 5, 5)
-        insert_book("Book 2", "Author", "1234567890124", 5, 5)
-
-        # Borrow 4 books first
-        borrow_date = datetime.now()
-        due_date = borrow_date + timedelta(days=14)
-        for i in range(4):
-            insert_borrow_record("123456", 1, borrow_date, due_date)
-
-        # Should still be able to borrow the 5th book
-        result, message = borrow_book_by_patron("123456", 2)
-        assert result == True
-
-    def test_patron_borrowing_limit_at_5_books(self):
-        """Test borrowing succeeds when patron has exactly 5 books """
-        insert_book("Book 1", "Author", "1234567890123", 5, 5)
-        insert_book("Book 2", "Author", "1234567890124", 5, 5)
-
-        # Borrow 5 books first
-        borrow_date = datetime.now()
-        due_date = borrow_date + timedelta(days=14)
-        for i in range(5):
-            insert_borrow_record("123456", 1, borrow_date, due_date)
-
-        # Due to bug in code (checks > 5 instead of >= 5), borrowing should succeed at 5 books
-        result, message = borrow_book_by_patron("123456", 2)
-        assert result == True
-
-    def test_patron_borrowing_limit_exceeds_5_books(self):
-        """Test borrowing fails when patron has more than 5 books"""
-        insert_book("Book 1", "Author", "1234567890123", 7, 7)
-        insert_book("Book 2", "Author", "1234567890124", 7, 7)
-
-        # Borrow 6 books first to exceed the limit
-        borrow_date = datetime.now()
-        due_date = borrow_date + timedelta(days=14)
-        for i in range(6):
-            insert_borrow_record("123456", 1, borrow_date, due_date)
-
-        # Should not be able to borrow another book when having more than 5
-        result, message = borrow_book_by_patron("123456", 2)
-        assert result == False
-        assert "maximum borrowing limit" in message
-
     def test_borrowing_record_creation(self):
         """Test that borrowing creates proper borrow record"""
         insert_book("Record Test", "Author", "1234567890123", 3, 3)

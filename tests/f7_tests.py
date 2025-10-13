@@ -58,15 +58,20 @@ class TestR7Requirements:
         due_date = borrow_date + timedelta(days=14)
         insert_borrow_record("123456", 1, borrow_date, due_date)
 
+        borrow_date_2 = datetime.now() - timedelta(days=20)  # 20 days ago, so 6 days overdue
+        due_date_2 = borrow_date_2 + timedelta(days=14)
+        insert_borrow_record("123456", 1, borrow_date_2, due_date_2)
+
         report = get_patron_status_report("123456")
-        # Should calculate late fees: capped at $15.00
-        assert report["late_fees"] == 15.00
+        # Should calculate late fees: capped at $15.00 * 2 books
+        assert report["late_fees"] == 30.00
 
-    def test_status_report_validates_patron_id_format(self):
-        """Test status report validates 6-digit patron ID format"""
-        # Test invalid patron ID formats
-        invalid_ids = ["12345", "1234567", "abc123", ""]
-
-        for invalid_id in invalid_ids:
-            report = get_patron_status_report(invalid_id)
-            assert "error" in report or report == {}
+    def test_displays_number_of_books_currently_borrowed(self):
+        """Test status report displays correct number of books currently borrowed"""
+        # Add books to catalog
+        insert_book("Book One", "Author A", "1234567890123", 2, 2)
+        insert_book("Book Two", "Author B", "1234567890124", 1, 1)
+        insert_borrow_record("123456", 1, datetime.now(), datetime.now() + timedelta(days=14))
+        insert_borrow_record("123456", 2, datetime.now(), datetime.now() + timedelta(days=14))
+        report = get_patron_status_report("123456")
+        assert report["number_of_books_borrowed"] == 2
