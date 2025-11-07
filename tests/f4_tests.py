@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from library_service import return_book_by_patron
+from services.library_service import return_book_by_patron
 from database import init_database, get_db_connection, insert_book, insert_borrow_record, get_book_by_id, get_patron_borrow_count
 
 class TestR4Requirements:

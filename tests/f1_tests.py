@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from library_service import add_book_to_catalog
+from services.library_service import add_book_to_catalog
 from database import init_database, get_db_connection
 
 class TestF1Requirements:

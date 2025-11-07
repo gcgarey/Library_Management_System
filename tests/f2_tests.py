@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import get_all_books, init_database, add_sample_data, insert_book, get_db_connection
-from library_service import add_book_to_catalog
+from services.library_service import add_book_to_catalog
 
 
 class TestR2CatalogDisplay:

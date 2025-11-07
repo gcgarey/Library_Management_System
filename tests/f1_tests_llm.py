@@ -1,7 +1,7 @@
 # PYTHONPATH=. pytest tests/f1_test.py
 import pytest
 from unittest.mock import patch, MagicMock
-from library_service import (
+from services.library_service import (
     add_book_to_catalog
 )
 
@@ -9,8 +9,8 @@ from library_service import (
 
 def test_tc1_1_valid_book_minimum_data():
     """TC1.1: Verify that a book can be added with minimum valid data."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("A", "B", "1234567890123", 1)
         assert success == True
         assert 'book "a" has been successfully added to the catalog.' in message.lower()
@@ -19,24 +19,24 @@ def test_tc1_2_valid_book_maximum_data():
     """TC1.2: Verify that a book can be added with maximum allowed character lengths."""
     title_200 = "A" * 200
     author_100 = "B" * 100
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog(title_200, author_100, "9876543210987", 1000)
         assert success == True
         assert "successfully added" in message.lower()
 
 def test_tc1_3_valid_book_typical_data():
     """TC1.3: Verify that a book can be added with typical realistic data."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("The Great Gatsby", "F. Scott Fitzgerald", "9780743273565", 5)
         assert success == True
         assert 'book "the great gatsby" has been successfully added' in message.lower()
 
 def test_tc1_4_valid_book_with_leading_trailing_spaces():
     """TC1.4: Verify that leading and trailing spaces are trimmed before adding."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("  The Catcher in the Rye  ", "  J.D. Salinger  ", "9780316769488", 3)
         assert success == True
         assert 'book "the catcher in the rye" has been successfully added' in message.lower()
@@ -71,8 +71,8 @@ def test_tc2_4_title_exceeding_200_characters():
 def test_tc2_5_title_exactly_200_characters_with_spaces():
     """TC2.5: Verify handling of title that is exactly 200 chars after trimming."""
     title_with_spaces = "  " + ("A" * 200) + "  "
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog(title_with_spaces, "John Doe", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
@@ -114,8 +114,8 @@ def test_tc3_4_author_exceeding_100_characters():
 def test_tc3_5_author_exactly_100_characters():
     """TC3.5: Verify that author with exactly 100 characters is accepted."""
     author_100 = "B" * 100
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Valid Title", author_100, "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
@@ -167,8 +167,8 @@ def test_tc4_6_empty_isbn():
 
 def test_tc4_7_isbn_with_leading_zeros():
     """TC4.7: Verify that ISBN with leading zeros is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Valid Title", "Valid Author", "0000000000123", 1)
         assert success == True
         assert "successfully added" in message.lower()
@@ -207,8 +207,8 @@ def test_tc5_5_none_as_total_copies():
 
 def test_tc5_6_very_large_total_copies():
     """TC5.6: Verify that very large positive integer is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Valid Title", "Valid Author", "1234567890123", 999999999)
         assert success == True
         assert "successfully added" in message.lower()
@@ -217,15 +217,15 @@ def test_tc5_6_very_large_total_copies():
 
 def test_tc6_1_duplicate_isbn():
     """TC6.1: Verify that duplicate ISBN is rejected."""
-    with patch('library_service.get_book_by_isbn', return_value={"isbn": "1234567890123"}):
+    with patch('services.library_service.get_book_by_isbn', return_value={"isbn": "1234567890123"}):
         success, message = add_book_to_catalog("Different Title", "Different Author", "1234567890123", 5)
         assert success == False
         assert "a book with this isbn already exists." in message.lower()
 
 def test_tc6_2_database_insert_failure():
     """TC6.2: Verify proper error handling when database insert fails."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=False):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=False):
         success, message = add_book_to_catalog("Valid Title", "Valid Author", "1234567890123", 1)
         assert success == False
         assert "database error occurred while adding the book." in message.lower()
@@ -234,40 +234,40 @@ def test_tc6_2_database_insert_failure():
 
 def test_tc7_1_title_with_special_characters():
     """TC7.1: Verify that title with special characters is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Book: A Journey! @2024 #1", "Valid Author", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
 
 def test_tc7_2_author_with_special_characters():
     """TC7.2: Verify that author with special characters is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Valid Title", "O'Brien, Jr.", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
 
 def test_tc7_3_title_with_unicode_characters():
     """TC7.3: Verify that title with Unicode characters is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("日本語のタイトル", "Valid Author", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
 
 def test_tc7_4_author_with_unicode_characters():
     """TC7.4: Verify that author with Unicode characters is accepted."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("Valid Title", "José García", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()
 
 def test_tc7_5_multiple_consecutive_spaces_in_title():
     """TC7.5: Verify handling of multiple spaces within title."""
-    with patch('library_service.get_book_by_isbn', return_value=None), \
-         patch('library_service.insert_book', return_value=True):
+    with patch('services.library_service.get_book_by_isbn', return_value=None), \
+         patch('services.library_service.insert_book', return_value=True):
         success, message = add_book_to_catalog("The    Great    Book", "Valid Author", "1234567890123", 1)
         assert success == True
         assert "successfully added" in message.lower()

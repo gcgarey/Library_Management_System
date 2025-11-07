@@ -8,7 +8,7 @@ import os
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from library_service import return_book_by_patron
+from services.library_service import return_book_by_patron
 from database import (
     init_database,
     get_db_connection,
@@ -37,16 +37,16 @@ class TestR4BookReturn:
         borrow_date = datetime.now() - timedelta(days=7)
         due_date = borrow_date + timedelta(days=14)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1, 
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -58,16 +58,16 @@ class TestR4BookReturn:
         """TC1.2: Verify successful return on exact due date (boundary - no late fee)."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -79,16 +79,16 @@ class TestR4BookReturn:
         borrow_date = datetime.now() - timedelta(days=3)
         due_date = borrow_date + timedelta(days=14)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Early Return', 'available_copies': 4
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '999999', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("999999", 1)
             
@@ -99,16 +99,16 @@ class TestR4BookReturn:
         """TC1.4: Verify success message includes the book title."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'The Great Gatsby', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -121,16 +121,16 @@ class TestR4BookReturn:
         """TC2.1: Verify late fee calculation for 1 day overdue ($0.50)."""
         due_date = datetime.now() - timedelta(days=1)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -143,16 +143,16 @@ class TestR4BookReturn:
         """TC2.2: Verify late fee calculation for 7 days overdue ($3.50 - boundary)."""
         due_date = datetime.now() - timedelta(days=7)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=3.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=3.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -164,16 +164,16 @@ class TestR4BookReturn:
         """TC2.3: Verify late fee calculation for 8 days overdue ($4.50 - rate changes after 7 days)."""
         due_date = datetime.now() - timedelta(days=8)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=4.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=4.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -185,16 +185,16 @@ class TestR4BookReturn:
         """TC2.4: Verify late fee calculation for 15 days overdue ($11.50)."""
         due_date = datetime.now() - timedelta(days=15)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=11.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=11.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -206,16 +206,16 @@ class TestR4BookReturn:
         """TC2.5: Verify late fee caps at $15.00 maximum."""
         due_date = datetime.now() - timedelta(days=30)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=15.00):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=15.00):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -227,16 +227,16 @@ class TestR4BookReturn:
         """TC2.6: Verify 22 days overdue reaches exactly $15.00 cap (7*0.50 + 15*1.00 = 18.50, capped at 15)."""
         due_date = datetime.now() - timedelta(days=22)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=15.00):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=15.00):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -247,16 +247,16 @@ class TestR4BookReturn:
         """TC2.7: Verify fee still caps at $15.00 for extremely late returns (100 days)."""
         due_date = datetime.now() - timedelta(days=100)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=15.00):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=15.00):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -268,16 +268,16 @@ class TestR4BookReturn:
         """TC2.8: Verify late fee for 3 days overdue ($1.50)."""
         due_date = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=1.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=1.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -289,16 +289,16 @@ class TestR4BookReturn:
         """TC2.9: Verify late fee for 10 days overdue ($6.50 = 7*0.50 + 3*1.00)."""
         due_date = datetime.now() - timedelta(days=10)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=6.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=6.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -364,7 +364,7 @@ class TestR4BookReturn:
 
     def test_tc4_1_book_not_found(self):
         """TC4.1: Verify error when book ID does not exist."""
-        with patch('library_service.get_book_by_id', return_value=None):
+        with patch('services.library_service.get_book_by_id', return_value=None):
             success, message = return_book_by_patron("123456", 999)
             
             assert success == False
@@ -372,7 +372,7 @@ class TestR4BookReturn:
 
     def test_tc4_2_book_id_negative(self):
         """TC4.2: Verify error when book ID is negative."""
-        with patch('library_service.get_book_by_id', return_value=None):
+        with patch('services.library_service.get_book_by_id', return_value=None):
             success, message = return_book_by_patron("123456", -1)
             
             assert success == False
@@ -380,7 +380,7 @@ class TestR4BookReturn:
 
     def test_tc4_3_book_id_zero(self):
         """TC4.3: Verify error when book ID is zero."""
-        with patch('library_service.get_book_by_id', return_value=None):
+        with patch('services.library_service.get_book_by_id', return_value=None):
             success, message = return_book_by_patron("123456", 0)
             
             assert success == False
@@ -390,10 +390,10 @@ class TestR4BookReturn:
 
     def test_tc5_1_no_borrow_record_found(self):
         """TC5.1: Verify error when patron did not borrow the book."""
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 5
         }), \
-             patch('library_service.get_borrow_record', return_value=None):
+             patch('services.library_service.get_borrow_record', return_value=None):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -403,10 +403,10 @@ class TestR4BookReturn:
 
     def test_tc5_2_wrong_patron_returning_book(self):
         """TC5.2: Verify error when different patron tries to return someone else's book."""
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 5
         }), \
-             patch('library_service.get_borrow_record', return_value=None):
+             patch('services.library_service.get_borrow_record', return_value=None):
             
             success, message = return_book_by_patron("999999", 1)
             
@@ -415,10 +415,10 @@ class TestR4BookReturn:
 
     def test_tc5_3_book_already_returned(self):
         """TC5.3: Verify error when trying to return a book that was already returned."""
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 5
         }), \
-             patch('library_service.get_borrow_record', return_value=None):
+             patch('services.library_service.get_borrow_record', return_value=None):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -431,14 +431,14 @@ class TestR4BookReturn:
         """TC6.1: Verify error handling when book availability update fails."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=False):
+             patch('services.library_service.update_book_availability', return_value=False):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -450,15 +450,15 @@ class TestR4BookReturn:
         """TC6.2: Verify error handling when borrow record return date update fails."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=False):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=False):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -472,16 +472,16 @@ class TestR4BookReturn:
         """TC7.1: Verify returning book with special characters in title."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Book: A Journey! @2024 #1', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -492,16 +492,16 @@ class TestR4BookReturn:
         """TC7.2: Verify returning book with Unicode characters in title."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': '日本語のタイトル', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -512,16 +512,16 @@ class TestR4BookReturn:
         """TC7.3: Verify successful return with patron ID containing leading zeros."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '000123', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("000123", 1)
             
@@ -532,16 +532,16 @@ class TestR4BookReturn:
         """TC7.4: Verify handling of very large book ID."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 999999999, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 999999999,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 999999999)
             
@@ -554,16 +554,16 @@ class TestR4BookReturn:
         """TC8.1: Verify late fee is formatted to 2 decimal places."""
         due_date = datetime.now() - timedelta(days=1)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -577,16 +577,16 @@ class TestR4BookReturn:
         """TC8.2: Verify number of days overdue is displayed in message."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=2.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=2.50):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -598,16 +598,16 @@ class TestR4BookReturn:
         # 7 days: 7 * 0.50 = $3.50
         due_date_7 = datetime.now() - timedelta(days=7)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date_7.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=3.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=3.50):
             
             success, message = return_book_by_patron("123456", 1)
             assert success == True
@@ -616,16 +616,16 @@ class TestR4BookReturn:
         # 8 days: 7 * 0.50 + 1 * 1.00 = $4.50
         due_date_8 = datetime.now() - timedelta(days=8)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date_8.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=4.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=4.50):
             
             success, message = return_book_by_patron("123456", 1)
             assert success == True
@@ -638,31 +638,31 @@ class TestR4BookReturn:
         due_date = datetime.now()
         
         # First patron returns book 1
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Book 1', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '111111', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success1, message1 = return_book_by_patron("111111", 1)
             assert success1 == True
         
         # Second patron returns book 2
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 2, 'title': 'Book 2', 'available_copies': 3
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '222222', 'book_id': 2,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success2, message2 = return_book_by_patron("222222", 2)
             assert success2 == True
@@ -672,31 +672,31 @@ class TestR4BookReturn:
         due_date = datetime.now()
         
         # Return first book
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Book 1', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success1, message1 = return_book_by_patron("123456", 1)
             assert success1 == True
         
         # Return second book
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 2, 'title': 'Book 2', 'available_copies': 3
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 2,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success2, message2 = return_book_by_patron("123456", 2)
             assert success2 == True
@@ -706,16 +706,16 @@ class TestR4BookReturn:
         # Return first book on time
         due_date_future = datetime.now() + timedelta(days=5)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'On Time Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date_future.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success1, message1 = return_book_by_patron("123456", 1)
             assert success1 == True
@@ -724,16 +724,16 @@ class TestR4BookReturn:
         # Return second book late
         due_date_past = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 2, 'title': 'Late Book', 'available_copies': 3
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 2,
                  'due_date': due_date_past.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=2.50):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=2.50):
             
             success2, message2 = return_book_by_patron("123456", 2)
             assert success2 == True
@@ -745,16 +745,16 @@ class TestR4BookReturn:
         """TC10.1: Verify that book's available copies increase by exactly 1 on return."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability') as mock_update, \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability') as mock_update, \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             mock_update.return_value = True
             success, message = return_book_by_patron("123456", 1)
@@ -767,16 +767,16 @@ class TestR4BookReturn:
         """TC10.2: Verify book with 0 available copies increases to 1 after return."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Fully Borrowed Book', 'available_copies': 0
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -789,16 +789,16 @@ class TestR4BookReturn:
         """TC11.1: Verify that return date is recorded when book is returned."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date') as mock_return_date, \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date') as mock_return_date, \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             mock_return_date.return_value = True
             success, message = return_book_by_patron("123456", 1)
@@ -818,16 +818,16 @@ class TestR4BookReturn:
         """TC12.1: Verify patron ID of all zeros is valid."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '000000', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("000000", 1)
             
@@ -838,16 +838,16 @@ class TestR4BookReturn:
         """TC12.2: Verify patron ID of all nines is valid."""
         due_date = datetime.now()
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '999999', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("999999", 1)
             
@@ -859,16 +859,16 @@ class TestR4BookReturn:
         due_date = datetime.now()
         long_title = "A" * 200
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': long_title, 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=0):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=0):
             
             success, message = return_book_by_patron("123456", 1)
             
@@ -879,16 +879,16 @@ class TestR4BookReturn:
         """TC12.4: Verify late fee for 2 days overdue ($1.00)."""
         due_date = datetime.now() - timedelta(days=2)
         
-        with patch('library_service.get_book_by_id', return_value={
+        with patch('services.library_service.get_book_by_id', return_value={
             'id': 1, 'title': 'Test Book', 'available_copies': 2
         }), \
-             patch('library_service.get_borrow_record', return_value={
+             patch('services.library_service.get_borrow_record', return_value={
                  'patron_id': '123456', 'book_id': 1,
                  'due_date': due_date.isoformat(), 'return_date': None
              }), \
-             patch('library_service.update_book_availability', return_value=True), \
-             patch('library_service.update_borrow_record_return_date', return_value=True), \
-             patch('library_service.calculate_late_fee_for_book', return_value=1.00):
+             patch('services.library_service.update_book_availability', return_value=True), \
+             patch('services.library_service.update_borrow_record_return_date', return_value=True), \
+             patch('services.library_service.calculate_late_fee_for_book', return_value=1.00):
             
             success, message = return_book_by_patron("123456", 1)
             

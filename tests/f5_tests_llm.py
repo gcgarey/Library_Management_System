@@ -8,7 +8,7 @@ import os
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from library_service import calculate_late_fee_for_book
+from services.library_service import calculate_late_fee_for_book
 from database import init_database, get_db_connection
 
 
@@ -31,7 +31,7 @@ class TestR5LateFeeCalculation:
         """TC1.1: Verify zero fee when book is not yet due."""
         due_date = datetime.now() + timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -48,7 +48,7 @@ class TestR5LateFeeCalculation:
         """TC1.2: Verify zero fee when book is due today (boundary - not overdue)."""
         due_date = datetime.now()
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -65,7 +65,7 @@ class TestR5LateFeeCalculation:
         """TC1.3: Verify zero fee for book returned before due date."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -83,7 +83,7 @@ class TestR5LateFeeCalculation:
         """TC2.1: Verify fee for 1 day overdue ($0.50)."""
         due_date = datetime.now() - timedelta(days=1)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -100,7 +100,7 @@ class TestR5LateFeeCalculation:
         """TC2.2: Verify fee for 2 days overdue ($1.00)."""
         due_date = datetime.now() - timedelta(days=2)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -116,7 +116,7 @@ class TestR5LateFeeCalculation:
         """TC2.3: Verify fee for 3 days overdue ($1.50)."""
         due_date = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -132,7 +132,7 @@ class TestR5LateFeeCalculation:
         """TC2.4: Verify fee for 4 days overdue ($2.00)."""
         due_date = datetime.now() - timedelta(days=4)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -148,7 +148,7 @@ class TestR5LateFeeCalculation:
         """TC2.5: Verify fee for 5 days overdue ($2.50)."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -164,7 +164,7 @@ class TestR5LateFeeCalculation:
         """TC2.6: Verify fee for 6 days overdue ($3.00)."""
         due_date = datetime.now() - timedelta(days=6)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -180,7 +180,7 @@ class TestR5LateFeeCalculation:
         """TC2.7: Verify fee for 7 days overdue ($3.50 - boundary)."""
         due_date = datetime.now() - timedelta(days=7)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -198,7 +198,7 @@ class TestR5LateFeeCalculation:
         """TC3.1: Verify fee for 8 days overdue ($4.50 - rate changes after day 7)."""
         due_date = datetime.now() - timedelta(days=8)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -214,7 +214,7 @@ class TestR5LateFeeCalculation:
         """TC3.2: Verify fee for 9 days overdue ($5.50)."""
         due_date = datetime.now() - timedelta(days=9)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -230,7 +230,7 @@ class TestR5LateFeeCalculation:
         """TC3.3: Verify fee for 10 days overdue ($6.50)."""
         due_date = datetime.now() - timedelta(days=10)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -246,7 +246,7 @@ class TestR5LateFeeCalculation:
         """TC3.4: Verify fee for 15 days overdue ($11.50)."""
         due_date = datetime.now() - timedelta(days=15)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -262,7 +262,7 @@ class TestR5LateFeeCalculation:
         """TC3.5: Verify fee for 20 days overdue ($15.00 - reaches cap)."""
         due_date = datetime.now() - timedelta(days=20)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -278,7 +278,7 @@ class TestR5LateFeeCalculation:
         """TC3.6: Verify fee caps at $15.00 for 22 days overdue."""
         due_date = datetime.now() - timedelta(days=22)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -294,7 +294,7 @@ class TestR5LateFeeCalculation:
         """TC3.7: Verify fee remains capped at $15.00 for 30 days overdue."""
         due_date = datetime.now() - timedelta(days=30)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -310,7 +310,7 @@ class TestR5LateFeeCalculation:
         """TC3.8: Verify fee remains capped at $15.00 even for extremely overdue books (100 days)."""
         due_date = datetime.now() - timedelta(days=100)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -386,7 +386,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc5_1_no_borrow_record_found(self):
         """TC5.1: Verify error when no borrow record exists."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("123456", 1)
             
             assert result['status'] == 'error'
@@ -396,7 +396,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc5_2_wrong_patron_book_combination(self):
         """TC5.2: Verify error for non-existent patron-book combination."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("999999", 999)
             
             assert result['status'] == 'error'
@@ -405,7 +405,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc5_3_invalid_book_id(self):
         """TC5.3: Verify error for invalid book ID."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("123456", -1)
             
             assert result['status'] == 'error'
@@ -417,7 +417,7 @@ class TestR5LateFeeCalculation:
         """TC6.1: Verify response contains all required JSON fields."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -434,7 +434,7 @@ class TestR5LateFeeCalculation:
         """TC6.2: Verify fee_amount is properly rounded to 2 decimal places."""
         due_date = datetime.now() - timedelta(days=1)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -449,7 +449,7 @@ class TestR5LateFeeCalculation:
         """TC6.3: Verify days_overdue is an integer."""
         due_date = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -463,7 +463,7 @@ class TestR5LateFeeCalculation:
         """TC6.4: Verify status field contains either 'success' or 'error'."""
         due_date = datetime.now() - timedelta(days=1)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -477,7 +477,7 @@ class TestR5LateFeeCalculation:
         """TC6.5: Verify message field is a string."""
         due_date = datetime.now() - timedelta(days=2)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -494,7 +494,7 @@ class TestR5LateFeeCalculation:
         """TC7.1: Verify calculation works with patron ID of all zeros."""
         due_date = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '000000',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -509,7 +509,7 @@ class TestR5LateFeeCalculation:
         """TC7.2: Verify calculation works with patron ID of all nines."""
         due_date = datetime.now() - timedelta(days=4)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '999999',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -524,7 +524,7 @@ class TestR5LateFeeCalculation:
         """TC7.3: Verify calculation with patron ID containing leading zeros."""
         due_date = datetime.now() - timedelta(days=2)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '000123',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -539,7 +539,7 @@ class TestR5LateFeeCalculation:
         """TC7.4: Verify calculation with very large book ID."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 999999999,
             'due_date': due_date.isoformat(),
@@ -552,7 +552,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc7_5_book_id_zero(self):
         """TC7.5: Verify handling of book ID zero."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("123456", 0)
             
             assert result['status'] == 'error'
@@ -560,7 +560,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc7_6_book_id_negative(self):
         """TC7.6: Verify handling of negative book ID."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("123456", -999)
             
             assert result['status'] == 'error'
@@ -572,7 +572,7 @@ class TestR5LateFeeCalculation:
         """TC8.1: Verify fee calculation boundary at exactly 7 days ($3.50)."""
         due_date = datetime.now() - timedelta(days=7)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -587,7 +587,7 @@ class TestR5LateFeeCalculation:
         """TC8.2: Verify rate change boundary at 8 days ($4.50)."""
         due_date = datetime.now() - timedelta(days=8)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -602,7 +602,7 @@ class TestR5LateFeeCalculation:
         """TC8.3: Verify fee reaches $15.00 cap at 22 days (7*0.50 + 15*1.00 = 18.50, capped at 15)."""
         due_date = datetime.now() - timedelta(days=22)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -617,7 +617,7 @@ class TestR5LateFeeCalculation:
         """TC8.4: Verify fee at 21 days (21 days = $17.50 before cap, capped at $15.00)."""
         due_date = datetime.now() - timedelta(days=21)
 
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -635,7 +635,7 @@ class TestR5LateFeeCalculation:
         due_date = datetime.now() - timedelta(days=3)
         
         # First book
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -646,7 +646,7 @@ class TestR5LateFeeCalculation:
         
         # Second book with different overdue days
         due_date2 = datetime.now() - timedelta(days=10)
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 2,
             'due_date': due_date2.isoformat(),
@@ -660,7 +660,7 @@ class TestR5LateFeeCalculation:
         due_date = datetime.now() - timedelta(days=5)
         
         # First patron
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '111111',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -670,7 +670,7 @@ class TestR5LateFeeCalculation:
             assert result1['fee_amount'] == 2.50
         
         # Second patron (different record)
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '222222',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -683,7 +683,7 @@ class TestR5LateFeeCalculation:
         """TC9.3: Verify same patron can have books with and without fees."""
         # Book 1: Not overdue
         due_date_future = datetime.now() + timedelta(days=3)
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date_future.isoformat(),
@@ -695,7 +695,7 @@ class TestR5LateFeeCalculation:
         
         # Book 2: Overdue
         due_date_past = datetime.now() - timedelta(days=5)
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 2,
             'due_date': due_date_past.isoformat(),
@@ -711,7 +711,7 @@ class TestR5LateFeeCalculation:
         """TC10.1: Verify success message includes number of days overdue."""
         due_date = datetime.now() - timedelta(days=12)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -726,7 +726,7 @@ class TestR5LateFeeCalculation:
         """TC10.2: Verify clear message when book is not overdue."""
         due_date = datetime.now() + timedelta(days=3)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -745,7 +745,7 @@ class TestR5LateFeeCalculation:
 
     def test_tc10_4_error_message_for_no_record(self):
         """TC10.4: Verify clear error message when no borrow record found."""
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result = calculate_late_fee_for_book("123456", 1)
             
             assert 'no active borrow record found' in result['message'].lower()
@@ -756,7 +756,7 @@ class TestR5LateFeeCalculation:
         """TC11.1: Verify fee for 11 days overdue ($7.50 = 7*0.50 + 4*1.00)."""
         due_date = datetime.now() - timedelta(days=11)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -772,7 +772,7 @@ class TestR5LateFeeCalculation:
         """TC11.2: Verify fee for 12 days overdue ($8.50)."""
         due_date = datetime.now() - timedelta(days=12)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -788,7 +788,7 @@ class TestR5LateFeeCalculation:
         """TC11.3: Verify fee for 13 days overdue ($9.50)."""
         due_date = datetime.now() - timedelta(days=13)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -804,7 +804,7 @@ class TestR5LateFeeCalculation:
         """TC11.4: Verify fee for 14 days overdue ($10.50 - exactly 2 weeks late)."""
         due_date = datetime.now() - timedelta(days=14)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -820,7 +820,7 @@ class TestR5LateFeeCalculation:
         """TC11.5: Verify fee for 19 days overdue ($15.00 - at cap)."""
         due_date = datetime.now() - timedelta(days=19)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -836,7 +836,7 @@ class TestR5LateFeeCalculation:
         """TC11.6: Verify fee for 21 days overdue ($17.50 = 7*0.50 + 14*1.00, capped at $15.00)."""
         due_date = datetime.now() - timedelta(days=21)
 
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -854,7 +854,7 @@ class TestR5LateFeeCalculation:
         """TC12.1: Verify function returns a dictionary."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -869,7 +869,7 @@ class TestR5LateFeeCalculation:
         # Not overdue case
         due_date = datetime.now() + timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -883,7 +883,7 @@ class TestR5LateFeeCalculation:
         """TC12.3: Verify days_overdue is never negative in response (shows 0 when not overdue)."""
         due_date = datetime.now() + timedelta(days=5)
         
-        with patch('library_service.get_borrow_record', return_value={
+        with patch('services.library_service.get_borrow_record', return_value={
             'patron_id': '123456',
             'book_id': 1,
             'due_date': due_date.isoformat(),
@@ -900,7 +900,7 @@ class TestR5LateFeeCalculation:
         for days in test_days:
             due_date = datetime.now() - timedelta(days=days)
             
-            with patch('library_service.get_borrow_record', return_value={
+            with patch('services.library_service.get_borrow_record', return_value={
                 'patron_id': '123456',
                 'book_id': 1,
                 'due_date': due_date.isoformat(),
@@ -923,7 +923,7 @@ class TestR5LateFeeCalculation:
         assert result2['fee_amount'] == 0.00
         
         # No record
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result3 = calculate_late_fee_for_book("123456", 1)
             assert result3['fee_amount'] == 0.00
 
@@ -934,7 +934,7 @@ class TestR5LateFeeCalculation:
         assert result1['days_overdue'] == 0
         
         # No record
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result2 = calculate_late_fee_for_book("123456", 1)
             assert result2['days_overdue'] == 0
 
@@ -945,7 +945,7 @@ class TestR5LateFeeCalculation:
         assert result1['status'] == 'error'
         
         # No record
-        with patch('library_service.get_borrow_record', return_value=None):
+        with patch('services.library_service.get_borrow_record', return_value=None):
             result2 = calculate_late_fee_for_book("123456", 1)
             assert result2['status'] == 'error'
 
@@ -963,7 +963,7 @@ class TestR5LateFeeCalculation:
         for days, expected_fee in expected_fees.items():
             due_date = datetime.now() - timedelta(days=days)
             
-            with patch('library_service.get_borrow_record', return_value={
+            with patch('services.library_service.get_borrow_record', return_value={
                 'patron_id': '123456',
                 'book_id': 1,
                 'due_date': due_date.isoformat(),

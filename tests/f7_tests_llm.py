@@ -8,7 +8,7 @@ import os
 # Add parent directory to path to import modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from library_service import get_patron_status_report
+from services.library_service import get_patron_status_report
 from database import init_database, get_db_connection
 
 
@@ -31,13 +31,13 @@ class TestR7PatronStatusReport:
         """TC1.1: Verify status report for patron with one borrowed book and no late fees."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Test Book', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -52,15 +52,15 @@ class TestR7PatronStatusReport:
         """TC1.2: Verify status report for patron with multiple borrowed books and no fees."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -73,13 +73,13 @@ class TestR7PatronStatusReport:
         """TC1.3: Verify status report for patron with one overdue book."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Overdue Book', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 2.50, 'days_overdue': 5
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -91,17 +91,17 @@ class TestR7PatronStatusReport:
         """TC1.4: Verify total late fees calculated correctly for multiple overdue books."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 2.50, 'days_overdue': 5},
                  {'status': 'success', 'fee_amount': 3.50, 'days_overdue': 7},
                  {'status': 'success', 'fee_amount': 5.00, 'days_overdue': 10}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -114,15 +114,15 @@ class TestR7PatronStatusReport:
         future_due = datetime.now() + timedelta(days=7)
         past_due = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'On Time Book', 'due_date': future_due.isoformat()},
             {'book_id': 2, 'title': 'Overdue Book', 'due_date': past_due.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0},
                  {'status': 'success', 'fee_amount': 1.50, 'days_overdue': 3}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -134,14 +134,14 @@ class TestR7PatronStatusReport:
         """TC1.6: Verify status report for patron at maximum borrowing limit (5 books)."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': i, 'title': f'Book {i}', 'due_date': due_date.isoformat()}
             for i in range(1, 6)
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -153,8 +153,8 @@ class TestR7PatronStatusReport:
 
     def test_tc2_1_patron_with_no_borrowed_books(self):
         """TC2.1: Verify status report for patron with no currently borrowed books."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -167,8 +167,8 @@ class TestR7PatronStatusReport:
 
     def test_tc2_2_new_patron_no_history(self):
         """TC2.2: Verify status report for new patron with no borrowing history."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("000001")
             
@@ -180,8 +180,8 @@ class TestR7PatronStatusReport:
 
     def test_tc3_1_patron_with_borrowing_history_no_current_books(self):
         """TC3.1: Verify status report includes borrowing history when no books currently borrowed."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Returned Book 1', 'borrow_date': '2024-01-01', 'return_date': '2024-01-15'},
                  {'book_id': 2, 'title': 'Returned Book 2', 'borrow_date': '2024-02-01', 'return_date': '2024-02-10'}
              ]):
@@ -196,13 +196,13 @@ class TestR7PatronStatusReport:
         """TC3.2: Verify status report includes both current books and history."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 3, 'title': 'Current Book', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Returned Book 1', 'borrow_date': '2024-01-01', 'return_date': '2024-01-15'},
                  {'book_id': 2, 'title': 'Returned Book 2', 'borrow_date': '2024-02-01', 'return_date': '2024-02-10'}
              ]):
@@ -221,8 +221,8 @@ class TestR7PatronStatusReport:
             for i in range(1, 21)
         ]
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=history):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=history):
             
             result = get_patron_status_report("123456")
             
@@ -288,8 +288,8 @@ class TestR7PatronStatusReport:
 
     def test_tc5_1_response_contains_all_required_fields(self):
         """TC5.1: Verify response contains all required fields."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -302,8 +302,8 @@ class TestR7PatronStatusReport:
 
     def test_tc5_2_currently_borrowed_books_is_list(self):
         """TC5.2: Verify currently_borrowed_books is a list."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -311,8 +311,8 @@ class TestR7PatronStatusReport:
 
     def test_tc5_3_total_late_fees_is_float(self):
         """TC5.3: Verify total_late_fees is a float."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -320,8 +320,8 @@ class TestR7PatronStatusReport:
 
     def test_tc5_4_num_books_borrowed_is_integer(self):
         """TC5.4: Verify num_books_borrowed is an integer."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -329,8 +329,8 @@ class TestR7PatronStatusReport:
 
     def test_tc5_5_borrowing_history_is_list(self):
         """TC5.5: Verify borrowing_history is a list."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -340,13 +340,13 @@ class TestR7PatronStatusReport:
         """TC5.6: Verify total_late_fees is rounded to 2 decimal places."""
         due_date = datetime.now() - timedelta(days=3)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 1.567, 'days_overdue': 3
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -358,13 +358,13 @@ class TestR7PatronStatusReport:
         """TC6.1: Verify late fee calculation errors are handled gracefully."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'error', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -375,17 +375,17 @@ class TestR7PatronStatusReport:
         """TC6.2: Verify total fees calculated correctly when some fee calculations error."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 2.50, 'days_overdue': 5},
                  {'status': 'error', 'fee_amount': 0.00, 'days_overdue': 0},
                  {'status': 'success', 'fee_amount': 3.00, 'days_overdue': 6}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -396,14 +396,14 @@ class TestR7PatronStatusReport:
         """TC6.3: Verify status report with maximum late fees ($15.00 per book)."""
         due_date = datetime.now() - timedelta(days=30)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 15.00, 'days_overdue': 30
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -414,8 +414,8 @@ class TestR7PatronStatusReport:
 
     def test_tc7_1_patron_id_all_zeros(self):
         """TC7.1: Verify status report works with patron ID of all zeros."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("000000")
             
@@ -424,8 +424,8 @@ class TestR7PatronStatusReport:
 
     def test_tc7_2_patron_id_all_nines(self):
         """TC7.2: Verify status report works with patron ID of all nines."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("999999")
             
@@ -434,8 +434,8 @@ class TestR7PatronStatusReport:
 
     def test_tc7_3_patron_id_with_leading_zeros(self):
         """TC7.3: Verify status report preserves leading zeros in patron ID."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("000123")
             
@@ -444,15 +444,15 @@ class TestR7PatronStatusReport:
 
     def test_tc7_4_patron_with_books_having_various_due_dates(self):
         """TC7.4: Verify status report with books having various due dates."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': (datetime.now() + timedelta(days=1)).isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': (datetime.now() + timedelta(days=7)).isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': (datetime.now() + timedelta(days=14)).isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -465,14 +465,14 @@ class TestR7PatronStatusReport:
         """TC8.1: Verify borrowed books include due date information."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Test Book', 'due_date': due_date.isoformat(), 
              'author': 'Test Author', 'isbn': '9781234567890'}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -483,14 +483,14 @@ class TestR7PatronStatusReport:
         """TC8.2: Verify borrowed books include book details (title, author, ISBN)."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'The Great Gatsby', 'due_date': due_date.isoformat(),
              'author': 'F. Scott Fitzgerald', 'isbn': '9780743273565'}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -504,15 +504,15 @@ class TestR7PatronStatusReport:
         """TC9.1: Verify num_books_borrowed matches length of currently_borrowed_books list."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -520,8 +520,8 @@ class TestR7PatronStatusReport:
 
     def test_tc9_2_num_books_borrowed_zero_when_no_books(self):
         """TC9.2: Verify num_books_borrowed is 0 when patron has no books."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -563,19 +563,19 @@ class TestR7PatronStatusReport:
         """TC11.1: Verify late fees from multiple books sum correctly."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()},
             {'book_id': 4, 'title': 'Book 4', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 1.50, 'days_overdue': 3},
                  {'status': 'success', 'fee_amount': 2.00, 'days_overdue': 4},
                  {'status': 'success', 'fee_amount': 0.50, 'days_overdue': 1},
                  {'status': 'success', 'fee_amount': 3.50, 'days_overdue': 7}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -586,14 +586,14 @@ class TestR7PatronStatusReport:
         """TC11.2: Verify late fees are 0.00 when all books are on time."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -604,15 +604,15 @@ class TestR7PatronStatusReport:
         """TC11.3: Verify late fees maintain proper decimal precision."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 1.55, 'days_overdue': 3},
                  {'status': 'success', 'fee_amount': 2.67, 'days_overdue': 5}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -623,8 +623,8 @@ class TestR7PatronStatusReport:
 
     def test_tc12_1_borrowing_history_includes_return_dates(self):
         """TC12.1: Verify borrowing history includes return dates."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Returned Book', 'borrow_date': '2024-01-01', 
                   'return_date': '2024-01-15', 'due_date': '2024-01-14'}
              ]):
@@ -636,8 +636,8 @@ class TestR7PatronStatusReport:
 
     def test_tc12_2_borrowing_history_includes_borrow_dates(self):
         """TC12.2: Verify borrowing history includes borrow dates."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Returned Book', 'borrow_date': '2024-01-01', 
                   'return_date': '2024-01-15'}
              ]):
@@ -649,8 +649,8 @@ class TestR7PatronStatusReport:
 
     def test_tc12_3_borrowing_history_includes_book_details(self):
         """TC12.3: Verify borrowing history includes book details."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'The Great Gatsby', 'author': 'F. Scott Fitzgerald',
                   'isbn': '9780743273565', 'borrow_date': '2024-01-01', 'return_date': '2024-01-15'}
              ]):
@@ -663,8 +663,8 @@ class TestR7PatronStatusReport:
 
     def test_tc12_4_borrowing_history_chronological_order(self):
         """TC12.4: Verify borrowing history maintains order (most recent first or oldest first)."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Book 1', 'borrow_date': '2024-01-01', 'return_date': '2024-01-15'},
                  {'book_id': 2, 'title': 'Book 2', 'borrow_date': '2024-02-01', 'return_date': '2024-02-15'},
                  {'book_id': 3, 'title': 'Book 3', 'borrow_date': '2024-03-01', 'return_date': '2024-03-15'}
@@ -686,15 +686,15 @@ class TestR7PatronStatusReport:
         current_due = datetime.now() + timedelta(days=7)
         overdue_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Current Book 1', 'due_date': current_due.isoformat()},
             {'book_id': 2, 'title': 'Overdue Book', 'due_date': overdue_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0},
                  {'status': 'success', 'fee_amount': 2.50, 'days_overdue': 5}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 3, 'title': 'Returned Book 1', 'borrow_date': '2024-01-01', 'return_date': '2024-01-15'},
                  {'book_id': 4, 'title': 'Returned Book 2', 'borrow_date': '2024-02-01', 'return_date': '2024-02-10'}
              ]):
@@ -712,15 +712,15 @@ class TestR7PatronStatusReport:
         """TC13.2: Verify status report for patron with all books overdue."""
         overdue_date = datetime.now() - timedelta(days=10)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Overdue Book 1', 'due_date': overdue_date.isoformat()},
             {'book_id': 2, 'title': 'Overdue Book 2', 'due_date': overdue_date.isoformat()},
             {'book_id': 3, 'title': 'Overdue Book 3', 'due_date': overdue_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 6.50, 'days_overdue': 10
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -730,8 +730,8 @@ class TestR7PatronStatusReport:
 
     def test_tc13_3_patron_recently_returned_all_books(self):
         """TC13.3: Verify status report for patron who recently returned all books."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[
                  {'book_id': 1, 'title': 'Recently Returned', 'borrow_date': '2024-10-01', 
                   'return_date': '2024-10-13'}
              ]):
@@ -749,13 +749,13 @@ class TestR7PatronStatusReport:
         """TC14.1: Verify status report handles book titles with special characters."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book: A Journey! @2024 #1', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -766,13 +766,13 @@ class TestR7PatronStatusReport:
         """TC14.2: Verify status report handles book titles with Unicode characters."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': '日本語のタイトル', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -783,8 +783,8 @@ class TestR7PatronStatusReport:
 
     def test_tc15_1_function_returns_dictionary(self):
         """TC15.1: Verify function returns a dictionary."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -792,8 +792,8 @@ class TestR7PatronStatusReport:
 
     def test_tc15_2_status_field_is_string(self):
         """TC15.2: Verify status field is a string."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -802,8 +802,8 @@ class TestR7PatronStatusReport:
 
     def test_tc15_3_patron_id_field_is_string(self):
         """TC15.3: Verify patron_id field is a string."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -815,14 +815,14 @@ class TestR7PatronStatusReport:
         """TC16.1: Verify handling of very large total late fees (multiple max fees)."""
         due_date = datetime.now() - timedelta(days=100)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': i, 'title': f'Book {i}', 'due_date': due_date.isoformat()}
             for i in range(1, 6)
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 15.00, 'days_overdue': 100
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -833,13 +833,13 @@ class TestR7PatronStatusReport:
         """TC16.2: Verify patron with overdue books due exactly today shows $0.00 fees."""
         due_date = datetime.now()
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Due Today', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -848,8 +848,8 @@ class TestR7PatronStatusReport:
 
     def test_tc16_3_empty_borrowing_history_list(self):
         """TC16.3: Verify empty borrowing history returns empty list, not None."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -862,13 +862,13 @@ class TestR7PatronStatusReport:
         """TC17.1: Verify repeated calls with same patron ID return consistent results."""
         due_date = datetime.now() + timedelta(days=7)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Test Book', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result1 = get_patron_status_report("123456")
             result2 = get_patron_status_report("123456")
@@ -880,25 +880,25 @@ class TestR7PatronStatusReport:
         due_date = datetime.now() + timedelta(days=7)
         
         # Patron 1
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result1 = get_patron_status_report("123456")
         
         # Patron 2
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', return_value={
+             patch('services.library_service.calculate_late_fee_for_book', return_value={
                  'status': 'success', 'fee_amount': 0.00, 'days_overdue': 0
              }), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result2 = get_patron_status_report("654321")
         
@@ -910,8 +910,8 @@ class TestR7PatronStatusReport:
 
     def test_tc18_1_late_fees_not_negative(self):
         """TC18.1: Verify late fees are never negative."""
-        with patch('library_service.get_patron_borrowed_books', return_value=[]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[]), \
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
@@ -921,17 +921,17 @@ class TestR7PatronStatusReport:
         """TC18.2: Verify late fees handle floating point precision correctly."""
         due_date = datetime.now() - timedelta(days=5)
         
-        with patch('library_service.get_patron_borrowed_books', return_value=[
+        with patch('services.library_service.get_patron_borrowed_books', return_value=[
             {'book_id': 1, 'title': 'Book 1', 'due_date': due_date.isoformat()},
             {'book_id': 2, 'title': 'Book 2', 'due_date': due_date.isoformat()},
             {'book_id': 3, 'title': 'Book 3', 'due_date': due_date.isoformat()}
         ]), \
-             patch('library_service.calculate_late_fee_for_book', side_effect=[
+             patch('services.library_service.calculate_late_fee_for_book', side_effect=[
                  {'status': 'success', 'fee_amount': 0.10, 'days_overdue': 1},
                  {'status': 'success', 'fee_amount': 0.20, 'days_overdue': 1},
                  {'status': 'success', 'fee_amount': 0.03, 'days_overdue': 1}
              ]), \
-             patch('library_service.get_borrowing_history', return_value=[]):
+             patch('services.library_service.get_borrowing_history', return_value=[]):
             
             result = get_patron_status_report("123456")
             
