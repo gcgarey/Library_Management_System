@@ -4,11 +4,12 @@ Handles all database operations and connections
 """
 
 import sqlite3
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 
-# Database configuration
-DATABASE = 'library.db'
+# Database configuration - can be overridden by environment variable
+DATABASE = os.environ.get('DATABASE_NAME', 'library.db')
 
 def get_db_connection():
     """Get a database connection."""
